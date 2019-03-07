@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Helle socktio</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+      var username = "";
+      if(readCookie("username") != ""){
+        username = readCookie("username");
+      }
+      var content_chat = "";
+      var socket = io("http://192.168.1.2:3000");
+      if(username.trim() != ""){
+        socket.emit("get_list_user_online",username);
+      }
+      else{
+        socket.emit("get_list_user_online");
+      }
+
+      socket.on("xuli-get-list-user-online", function(data){
+        for(i=0; i<data.mang1.length;i++){
+          var s = "<div username='"+data.mang1[i]+"' socketid='" + data.mang2[i] + "' class='motUser'>" + data.mang1[i] + "</div>";
+          $("#danhsachuserOnline").append(s);
+        }
+      })
+
+      socket.on("server-send-thatbai", function(data){
+        alert("User " + data + " is not availble!");
+      });
+
+      socket.on("server-send-dangki-thanhcong",function(data){
+        var s = "<div username='"+data.username+"' socketid='" + data.id + "' class='motUser'>" + data.username + "</div>";
+        $("#danhsachuserOnline").append(s);
+        username = data.username;
+        writeCookie("username",username,1);
+        //hide form dang ki user
+        //$("#txtuser, #btnDangki").hide(1000);
+      });
+
+      socket.on("server_goi_message", function(data){
+        var hoten = "<span class='hoten'>" + data.username + "</span>";
+        var msg = "<span class='msg'>" + data.msg + "</span>";
+        $("#dsMesg").append(hoten + ": " + msg + "<div class='block'></div>");
+      })
+
+      socket.on("server_xuli_chat", function(data){
+        //alert(data.nameuser_return + "Vừa chat với bạn :" + data.mssage_return);
+        if(!$("#right #"+data.nameuser_return).length){
+          var htm_chat = "<div class='chat_item' id='"+data.nameuser_return+"'><div class='' id='dsMesg'></div><div class='block'></div><input type='text' id='txtmessage' onchange=luu_noidungchat(this.value) placeholder='Message...' name='' value=''><input type='button' onclick=chat_click('"+data.name_chat+"','"+data.nameuser_return+"') class='btnchat' name='' value='Chat'><div class='block'></div></div>";
+          $("#right").html(htm_chat);
+        }
+
+        var hoten = "<span class='hoten'>" + data.name_chat + "</span>";
+        var msg = "<span class='msg'>" + data.mssage_return + "</span>";
+        $("#"+data.nameuser_return).find("#dsMesg").append(hoten + ": " + msg + "<div class='block'></div>");
+      })
+
+      //function js
+      function chat_click(id, user_send){
+        var idget_message = user_send;
+        var noidung_chat = $("#"+idget_message).find("#txtmessage").val();
+        socket.emit("user-chat-socketid-khac", {id:user_send,chat_item_msg:noidung_chat});
+      }
+
+      function luu_noidungchat(noidung){
+        content_chat = noidung;
+      }
+
+      function writeCookie(name,value,days) {
+          var date, expires;
+          if (days) {
+              date = new Date();
+              date.setTime(date.getTime()+(days*24*60*60*1000));
+              expires = "; expires=" + date.toGMTString();
+                  }else{
+              expires = "";
+          }
+          document.cookie = name + "=" + value + expires + "; path=/";
+      }
+
+      function readCookie(name) {
+        var i, c, ca, nameEQ = name + "=";
+        ca = document.cookie.split(';');
+        for(i=0;i < ca.length;i++) {
+            c = ca[i];
+            while (c.charAt(0)==' ') {
+                c = c.substring(1,c.length);
+            }
+            if (c.indexOf(nameEQ) == 0) {
+                return c.substring(nameEQ.length,c.length);
+            }
+        }
+        return '';
+      }
+
+      //End function js
+
+      $(document).ready(function(){
+        $('#btnDangki').click(function(){
+            socket.emit("client_gui_username", $("#txtuser").val());
+        });
+
+
+        $(document).on("click",".motUser", function(){
+          var id = $(this).attr('socketid');
+          var user_send = $(this).attr('username');
+          //socket.emit("user-chocgheo-socketid-khac", id);
+          var htm_chat = "<div class='chat_item' id='"+user_send+"'><div class='' id='dsMesg'></div><div class='block'></div><input type='text' id='txtmessage' onchange=luu_noidungchat(this.value) placeholder='Message...' name='' value=''><input type='button' onclick=chat_click('"+user_send+"','"+user_send+"') class='btnchat' name='' value='Chat'><div class='block'></div></div>";
+          $("#right").append(htm_chat);
+          //alert('a');
+        })
+      });
+    </script>
+  </head>
+  <body>
+    <div id="wraper">
+        <h1>Demo chat voi socket io</h1>
+        <input type="text" name="txtuser" id="txtuser" placeholder="Username..." value="">
+        <input type="button" id="btnDangki" name="" value="Đăng kí">
+        <div class="block"></div><br />
+        <div class="" id="left">
+            <div class="" id="title">
+                User Online
+            </div>
+            <div class="" id="danhsachuserOnline">
+
+            </div>
+        </div>
+
+        <div class="" id="right">
+          <!--<div class="chat_item">
+            <div class="" id="dsMesg">
+            </div>
+
+            <div class="block"></div>
+            <input type="text" id="txtmessage" placeholder="Message..." name="" value="">
+            <input type="button" id="btnchat" name="" value="Chat">
+
+            <div class="block"></div>
+          </div>-->
+
+        </div>
+    </div>
+  </body>
+</html>

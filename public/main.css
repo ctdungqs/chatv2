@@ -1,0 +1,58 @@
+body{
+  background: #dddddd;
+}
+
+h1{
+  text-align: center;
+}
+
+#left, #right{
+  min-height: 500px;
+  float: left;
+}
+
+#left{
+  width: 30%;
+  background:#f4a641;
+}
+
+#right{
+  width: 70%;
+}
+
+#title{
+  background: #f4cd41;
+  text-align: center;
+  padding: 5px 0px;
+}
+
+.block{
+  width: 100%;
+  clear: both;
+}
+
+#txtmessage, #btnchat{
+  float: left;
+  margin: 2px;
+}
+
+#txtmessage{
+  width: 70%;
+}
+
+.btnchat{
+  width: 25%;
+}
+
+.chat_item{
+  width: 25%;
+  margin: 5px;
+  background: #ffffff;
+  float: left;
+}
+
+#dsMesg{
+  height: 400px;
+  overflow: auto;
+  background: #eeeeee;
+}
